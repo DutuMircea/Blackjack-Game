@@ -11,16 +11,15 @@
 const int MAX_SCORE{ 21 };
 const int MIN_DEALER_SCORE{ 17 };
 
-enum class CardType {  // tipurile de carti
+enum class CardType {  // all types of cards
     clover,  // 0
     diamond,
     heart,
     spade, // 3
 
-    max_type,  // nr total de tipuri (4)
-};
+    max_type,  
 
-enum class CardRank { // numarul cartilor 2 - as
+enum class CardRank { 
     rank_2, // 0
     rank_3, // 1
     rank_4,
@@ -35,27 +34,27 @@ enum class CardRank { // numarul cartilor 2 - as
     rank_king,
     rank_ace, // 12
 
-    max_rank, // nr total de carti (13)
+    max_rank, 
 };
 
 struct Card {
-    CardType type{};  // var de tip (enum) CardType
-    CardRank rank{};// var de tip enum CardRank
+    CardType type{};  // each card has a type and a rank
+    CardRank rank{};
 };
 
-struct Player {
+struct Player {  
     int score{};
 };
 
-enum class Result {
+enum class Result {  // all the possible outcomes
     player_win,
     player_lose,
     tie,
 };
 
-void printCard(Card& card) {  // argument de tip (struct) Card  const? transmis prin referinta & pt a nu se face copie
+void printCard(const Card& card) {  // function for printing the type and rank of a card
     
-    switch (card.type) // pt fiecare type printam tipul cartii
+    switch (card.type) 
     {
     case CardType::clover:
         std::cout << 'C';
@@ -73,7 +72,7 @@ void printCard(Card& card) {  // argument de tip (struct) Card  const? transmis 
 
     switch (card.rank) 
     {
-    case CardRank::rank_2:  // pt fiecare rank printam nr corespunzator
+    case CardRank::rank_2: 
         std::cout << '2';
         break;
     case CardRank::rank_3:  
@@ -116,8 +115,7 @@ void printCard(Card& card) {  // argument de tip (struct) Card  const? transmis 
     
 }
 
-int getValue(Card& card) { 
-    // in functie de rank fiecare carte reprez un anumit nr de pct
+int getValue(const Card& card) { 
 
     switch (card.rank) {
     case CardRank::rank_2:
@@ -150,31 +148,26 @@ int getValue(Card& card) {
 }
 
 void printDeck(std::array<Card,52>& deck) {
-    // printare pachet
+    
 
-    for (auto& card : deck) { // for each loop, & ca sa nu creeze copie
-        printCard(card); // e bun cand avem array de tip struct ca sa nu ne complicam
+    for (auto& card : deck) { // iterating through the deck and printing the card
+        printCard(card); 
         std::cout << ' ';
     }
-
-    /*for (std::array<Card, 52>::size_type i{ 0 }; i < deck.size(); i++) {
-        std:: cout << printCard(deck.rank)
-    }*/
 
     std::cout << '\n';
 }
 std::array<Card, 52> generateDeck() { 
-    // fct ce returneaza un array
-    std::array<Card, 52> deck{}; // pachetu de joc cu 52 de carti 
-    // fiecare carte avand un type si un rank
+   
+    std::array<Card, 52> deck{}; // the deck has 52 cards
 
     std::array<Card, 52>::size_type i{ 0 }; // indexul trb sa fie te tip array pt a face atribuire
 
-    for (int type{ 0 }; type < static_cast<int>(CardType::max_type); type++) { // parcurgem toate tipurile si rankurile si dam convert la int
+    for (int type{ 0 }; type < static_cast<int>(CardType::max_type); type++) { // iteratin through all the card
         for (int rank{ 0 }; rank < static_cast<int>(CardRank::max_rank); rank++) {
-            deck[i].type = static_cast<CardType>(type); // pt fiecare carte din pachet atribuim tipul si rankul
-            deck[i].rank = static_cast<CardRank>(rank); // dam si convert de la int la tipul enum CardRank/Type
-            i++; // trecem la urmatoarea carte
+            deck[i].type = static_cast<CardType>(type); 
+            deck[i].rank = static_cast<CardRank>(rank); 
+            i++; // next card
         }
     }
 
@@ -184,7 +177,7 @@ std::array<Card, 52> generateDeck() {
 void ShuffleDeck(std::array<Card, 52>& deck) {
 
     static std::mt19937 mt{static_cast<std::mt19937::result_type>(std::time(nullptr))};
-    // fct random generator 
+    // generating a random number
     std::shuffle(deck.begin(), deck.end(), mt);
 }
 
@@ -204,30 +197,30 @@ bool playerHitorStand() {
 bool PlayerTurn(std::array<Card,52>& deck, std::array<Card, 52>::size_type& nextCard, Player& player ) {
 
     while (true) {
-        if (player.score > MAX_SCORE) { // daca pct din carti e mai mare de 21 ai pierdut
+        if (player.score > MAX_SCORE) { // losing condition of the player
             //std::cout << "YOU LOSE!\n";
             return true;
         }
         else {
-            if (playerHitorStand()) { // daca jucatorul doreste inca o carte
-                int cardValue{ getValue(deck[nextCard++]) }; // luam valoarea urmatoarei carti din pachet
-                player.score += cardValue; // se aduna la total 
+            if (playerHitorStand()) { 
+                int cardValue{ getValue(deck[nextCard++]) }; // drawing a card from the deck
+                player.score += cardValue; // adding the value of the card to the score
 
                 std::cout << "You received a (";
                 printCard(deck[nextCard - 1]);
                 nextCard++;
                 std::cout << ") " << cardValue << " with a TOTAL SCORE: " << player.score << '\n';
-                // daca vrem sa afisam si ce carte am primit trb sa facem overload la ">>" pt ca deckul e de tip enum
+                
             }
             else {
-                return false; // jucatorul nu a pierdut
+                return false; 
             }
         }
     }
 }
 bool DealerTurn(std::array<Card, 52>& deck, std::array<Card, 52>::size_type& nextCard, Player& dealer) {
 
-    while (dealer.score < MIN_DEALER_SCORE) { // dealerul trage carti pana trece de scorul minim
+    while (dealer.score < MIN_DEALER_SCORE) { // dealer keeps drawing card until it passes the min score
 
         int cardValue{ getValue(deck[nextCard++]) };
         
@@ -238,7 +231,7 @@ bool DealerTurn(std::array<Card, 52>& deck, std::array<Card, 52>::size_type& nex
         std::cout << ") " << cardValue << " with a TOTAL SCORE: " << dealer.score << '\n';
     }
 
-    if (dealer.score > MAX_SCORE) { // daca dealeru trece de pct max pierde
+    if (dealer.score > MAX_SCORE) { // losing condition of the dealer
         std::cout << "The dealer lost! \n";
         return true;  
     }
@@ -246,48 +239,43 @@ bool DealerTurn(std::array<Card, 52>& deck, std::array<Card, 52>::size_type& nex
     return false; // a tecut randul dealerului
 }
 
-Result playGame(std::array<Card, 52>& deck) { // Result playGame(std::array<Card, 52>& deck)
+Result playGame(std::array<Card, 52>& deck) {
     std::array<Card, 52>::size_type nextCard{0}; // indexul arrayul trebuie sa fie de tipu asta  overflow(??) nope
 
-    Player dealer{ getValue(deck[nextCard++]) }; // var de tip player si primeste o carte
+    Player dealer{ getValue(deck[nextCard++]) }; // the dealer draws a card
     std::cout << "The dealer got (";
     printCard(deck[nextCard - 1]);
     nextCard++;
-    std::cout << ") " << dealer.score <<  " points \n"; // scorul dealerului
+    std::cout << ") " << dealer.score <<  " points \n"; // the score is shown each time the player draws
 
-    Player player{ getValue(deck[nextCard]) + getValue(deck[nextCard++]) }; // cream player si primeste doua carti
+    Player player{ getValue(deck[nextCard]) + getValue(deck[nextCard++]) }; //the player draws 2 cards
     nextCard += 2;
 
     std::cout << "You received " << player.score << " points \n";
     
     
     if (PlayerTurn(deck, nextCard, player)) 
-        return Result::player_lose; // daca fct returneaza true playerul a pierdut // Result::player_lose
+        return Result::player_lose;   // the player loses
    
     if(DealerTurn(deck, nextCard, dealer))
-        return Result::player_win; // daca fct returneaza true playerul a castigat  Result::player_win
+        return Result::player_win; // the player wins
 
     
    if (player.score > dealer.score)
         return Result::player_win;
     else {
-        if (player.score == dealer.score)
+        if (player.score == dealer.score)  // draw condition
             return Result::tie;
     }
     
-   // return(player.score > dealer.score); // daca playerul are scor mai mare decat dealer a castigat(true)
+ 
 }
 int main()
 {
-    std::array<Card, 52> deck{generateDeck()}; // generam pachet
+    std::array<Card, 52> deck{generateDeck()}; // generating the deck
 
     while (true) {
-        ShuffleDeck(deck); // amestecam pachetu
-
-        /*if (playGame(deck))
-            std::cout << "YOU WIN!";
-        else
-            std::cout << "YOU LOSE!";*/
+        ShuffleDeck(deck); 
 
         switch (static_cast<int>(playGame(deck))) {
                 case 0: 
